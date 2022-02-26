@@ -141,3 +141,63 @@ app.post("/api/v1/post/tickets/reason/:server/:id/apikey=:api/:message", async (
   }
 });
 
+app.post("/api/v1/post/id/tracker/:server/apikey=:api/:newid", async (request, response) => {
+  // We use a mongoose method to find A record and update!
+  const test1 =  await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+
+  if (test1) {
+    await playerModel.findOneAndUpdate(
+      { ServerID: `${request.params.server}` },
+      { $set: { TicketTrackerChannelID: request.params.newid } }
+    );
+    response.send(`Updated ${request.params.server} Ticket Tracker ID`);
+  } else {
+    return('Failed')
+  }
+});
+
+app.post("/api/v1/post/id/ticket/:server/apikey=:api/:newid", async (request, response) => {
+  // We use a mongoose method to find A record and update!
+  const test1 =  await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+
+  if (test1) {
+    await playerModel.findOneAndUpdate(
+      { ServerID: `${request.params.server}` },
+      { $set: { TicketChannelID: request.params.newid } }
+    );
+    response.send(`Updated ${request.params.server} Ticket Channel ID`);
+  } else {
+    return('Failed')
+  }
+});
+
+app.post("/api/v1/post/id/support/:server/apikey=:api/:newid", async (request, response) => {
+  // We use a mongoose method to find A record and update!
+  const test1 =  await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+
+  if (test1) {
+    await playerModel.findOneAndUpdate(
+      { ServerID: `${request.params.server}` },
+      { $set: { SupportRoleID: request.params.newid } }
+    );
+    response.send(`Updated ${request.params.server} Support Role ID`);
+  } else {
+    return('Failed')
+  }
+});
+
+app.post("/api/v1/post/Prefix/:server/apikey=:api/:newid", async (request, response) => {
+  // We use a mongoose method to find A record and update!
+  const test1 =  await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+
+  if (test1) {
+    await playerModel.findOneAndUpdate(
+      { ServerID: `${request.params.server}` },
+      { $set: { Prefix: request.params.newid } }
+    );
+    response.send(`Updated ${request.params.server} prefix!`);
+  } else {
+    return('Failed')
+  }
+});
+

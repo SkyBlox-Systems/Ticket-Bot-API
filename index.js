@@ -47,10 +47,19 @@ app.get(`/api/v1/`, (request, response) => {
   response.send("Ticket Settings API")
 })
 
+app.get('/api/v2/', (request, response) => {
+  response.send('Ticket API v2')
+})
+
+app.get('/api/v2/post', (request, response) => {
+  response.send('Ticket API POST v2')
+})
+
 require('./models/settings')
 const playerModel = mongoose.model('TicketData')
 
-app.get(`/api/v1/settings/:id/apikey=:key`, async (request, response) => {
+// V2
+app.get(`/api/v2/settings/:id/apikey=:key`, async (request, response) => {
   async function playerDataCheck() {
     const playerData = await playerModel.findOne({ ServerID: `${request.params.id}`, APIKey: `${request.params.key}` })
 
@@ -63,6 +72,26 @@ app.get(`/api/v1/settings/:id/apikey=:key`, async (request, response) => {
 
   response.json(await playerDataCheck());
 });
+
+app.get('/api/v2/settings/premium/:id/apikey=:key', async (request, response) => {
+  async function playerDataCheck() {
+    const playerData = await playerModel.findOne({ ServerID: `${request.params.id}`, APIKey: `${request.params.key}` })
+
+    if (playerData.Tier === 'Premium') {
+      return(`Tier: ${playerData.Tier} Premium code: ${playerData.PremiumCode} Premium Expire: ${playerData.PremiumExpire}  Ticket Length: ${playerData.TicketIDLength}  Voice Tickets: ${playerData.VoiceTicket}`)
+      // return (`${playerData.Tier, playerData.PremiumCode, playerData.PremiumExpire, playerData.TicketIDLength, playerData.VoiceTicket}`)
+    } else {
+      return ('Guild dont have premium.')
+    }
+  }
+
+  response.json(await playerDataCheck());
+})
+
+// V1 
+
+// Settings
+
 
 // Tickets 
 
@@ -125,10 +154,10 @@ app.get("/api/v1/post", (request, response) => {
   response.send("Post API")
 })
 
-// We create a POST route
+// API v1 POST
 app.post("/api/v1/post/tickets/reason/:server/:id/apikey=:api/:message", async (request, response) => {
   // We use a mongoose method to find A record and update!
-  const test1 =  await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+  const test1 = await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
 
   if (test1) {
     await TicketClaim.findOneAndUpdate(
@@ -137,13 +166,13 @@ app.post("/api/v1/post/tickets/reason/:server/:id/apikey=:api/:message", async (
     );
     response.send(`Updated ${request.params.server} server ticket: ${request.params.id} reason with the new following reason: ${request.params.message}`);
   } else {
-    return('Failed')
+    return ('Failed')
   }
 });
 
 app.post("/api/v1/post/id/tracker/:server/apikey=:api/:newid", async (request, response) => {
   // We use a mongoose method to find A record and update!
-  const test1 =  await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+  const test1 = await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
 
   if (test1) {
     await playerModel.findOneAndUpdate(
@@ -152,13 +181,13 @@ app.post("/api/v1/post/id/tracker/:server/apikey=:api/:newid", async (request, r
     );
     response.send(`Updated ${request.params.server} Ticket Tracker ID`);
   } else {
-    return('Failed')
+    return ('Failed')
   }
 });
 
 app.post("/api/v1/post/id/ticket/:server/apikey=:api/:newid", async (request, response) => {
   // We use a mongoose method to find A record and update!
-  const test1 =  await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+  const test1 = await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
 
   if (test1) {
     await playerModel.findOneAndUpdate(
@@ -167,13 +196,13 @@ app.post("/api/v1/post/id/ticket/:server/apikey=:api/:newid", async (request, re
     );
     response.send(`Updated ${request.params.server} Ticket Channel ID`);
   } else {
-    return('Failed')
+    return ('Failed')
   }
 });
 
 app.post("/api/v1/post/id/support/:server/apikey=:api/:newid", async (request, response) => {
   // We use a mongoose method to find A record and update!
-  const test1 =  await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+  const test1 = await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
 
   if (test1) {
     await playerModel.findOneAndUpdate(
@@ -182,13 +211,13 @@ app.post("/api/v1/post/id/support/:server/apikey=:api/:newid", async (request, r
     );
     response.send(`Updated ${request.params.server} Support Role ID`);
   } else {
-    return('Failed')
+    return ('Failed')
   }
 });
 
 app.post("/api/v1/post/Prefix/:server/apikey=:api/:newid", async (request, response) => {
   // We use a mongoose method to find A record and update!
-  const test1 =  await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+  const test1 = await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
 
   if (test1) {
     await playerModel.findOneAndUpdate(
@@ -197,7 +226,119 @@ app.post("/api/v1/post/Prefix/:server/apikey=:api/:newid", async (request, respo
     );
     response.send(`Updated ${request.params.server} prefix!`);
   } else {
-    return('Failed')
+    return ('Failed')
   }
 });
 
+app.post("/api/v1/post/second/:server/apikey=:api", async (request, response) => {
+  // We use a mongoose method to find A record and update!
+  const test1 = await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+
+  if (test1) {
+    if (test1.SecondServer === 'Disabled') {
+      await playerModel.findOneAndUpdate(
+        { ServerID: `${request.params.server}` },
+        { $set: { SecondServer: 'Enabled' } }
+      );
+      response.send(`Second Guild has been enabled.`);
+    }
+    if (test1.SecondServer === 'Enabled') {
+      await playerModel.findOneAndUpdate(
+        { ServerID: `${request.params.server}` },
+        { $set: { SecondServer: 'Disabled' } }
+      );
+      response.send(`Second Guild has been disabled.`);
+    }
+  } else {
+    return ('Failed')
+  }
+});
+
+app.post("/api/v1/post/modmail/:server/apikey=:api", async (request, response) => {
+  // We use a mongoose method to find A record and update!
+  const test1 = await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+
+  if (test1) {
+    if (test1.ModMail === 'Disabled') {
+      await playerModel.findOneAndUpdate(
+        { ServerID: `${request.params.server}` },
+        { $set: { ModMail: 'Enabled' } }
+      );
+      response.send(`ModMail has been enabled.`);
+    }
+    if (test1.ModMail === 'Enabled') {
+      await playerModel.findOneAndUpdate(
+        { ServerID: `${request.params.server}` },
+        { $set: { ModMail: 'Disabled' } }
+      );
+      response.send(`ModMail has been disabled.`);
+    }
+  } else {
+    return ('Failed')
+  }
+});
+
+app.post("/api/v1/post/important/:server/apikey=:api", async (request, response) => {
+  // We use a mongoose method to find A record and update!
+  const test1 = await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+
+  if (test1) {
+    if (test1.Important === 'Disabled') {
+      await playerModel.findOneAndUpdate(
+        { ServerID: `${request.params.server}` },
+        { $set: { Important: 'Enabled' } }
+      );
+      response.send(`Important announcements has been enabled.`);
+    }
+    if (test1.Important === 'Enabled') {
+      await playerModel.findOneAndUpdate(
+        { ServerID: `${request.params.server}` },
+        { $set: { Important: 'Disabled' } }
+      );
+      response.send(`Important announcements has been disabled.`);
+    }
+  } else {
+    return ('Failed')
+  }
+});
+
+// API v2 POST
+
+app.post("/api/v2/post/settings/voice/:server/apikey=:api", async (request, response) => {
+  // We use a mongoose method to find A record and update!
+  const test1 = await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+
+  if (test1.Tier === 'Premium') {
+    if (test1.VoiceTicket === 'Disabled') {
+      await playerModel.findOneAndUpdate(
+        { ServerID: `${request.params.server}` },
+        { $set: { VoiceTicket: 'Enabled' } }
+      );
+      response.send('Enabled voice tickets in the guild.')
+    }
+    if (test1.VoiceTicket === 'Enabled') {
+      await playerModel.findOneAndUpdate(
+        { ServerID: `${request.params.server}` },
+        { $set: { VoiceTicket: 'Disabled' } }
+      );
+      response.send('Disabled voice tickets in the guild.')
+    }
+  } else {
+    return ('Guild dont have premium.')
+  }
+});
+
+
+app.post("/api/v2/post/settings/ticketlength/:server/apikey=:api&:number", async (request, response) => {
+  const test1 = await playerModel.findOne({ ServerID: `${request.params.server}`, APIKey: `${request.params.api}` })
+
+  if (test1.Tier === 'Premium') {
+    await playerModel.findOneAndUpdate(
+      { ServerID: `${request.params.server}` },
+      { $set: { TicketIDLength: `${request.params.number}` } }
+    );
+    response.send(`Ticket length has been updated to ${request.params.number}.`)
+  } else {
+    return ('Guild dont have premium.')
+  }
+})
